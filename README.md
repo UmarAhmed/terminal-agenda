@@ -1,3 +1,4 @@
 # terminal-agenda
 Minimalist agenda/calendar which records deadlines and helps reminds users
-Can run everytime you open a terminal, just place the executable in your .bashrc
+
+By placing the executable in your .bashrc, the program can output reminders everytime a terminal opens
