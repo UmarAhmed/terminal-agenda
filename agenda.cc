@@ -13,8 +13,7 @@ const string SILENT = "-s";
 
 // TODO:
 // move some things to functions to clean up
-// dynamic gap ?
-// delete old events from agenda automatically
+// dynamic gap/priority
 
 // Load in map from file (deserialize)
 map<string, Date> load() {
@@ -54,12 +53,20 @@ int main(int argc, char * argv[]) {
         // If it's in range then print to std::cout
         bool deadlines = 0;
         for (auto x: agenda) {
-            if ((x.second.month == month) && (x.second.day - day) < GAP) {
-                if (deadlines == 0) {
-                    deadlines = 1;
-                    cout << "Deadlines in the next " << GAP << " days:" << endl;
+            /* auto-remove old events - should there be a delay between deletion? */
+            if (x.second.month < month) {
+                agenda.erase(x.first);
+            }
+            if (x.second.month == month) {
+                if (x.second.day < day) {
+                    agenda.erase(x.first);
+                } else if ((x.second.day - day) < GAP) {
+                    if (deadlines == 0) {
+                        deadlines = 1;
+                        cout << "Deadlines in the next " << GAP << " days:" << endl;
+                    }
+                    cout << x.first << " " << x.second << endl;
                 }
-                cout << x.first << " " << x.second << endl;
             }
         }
         return 0;
@@ -70,7 +77,7 @@ int main(int argc, char * argv[]) {
 
     cout << "Welcome to your agenda" << endl;
     while (true) {
-        cout << "What would you like to do? (add/view/wipe/quit)" << endl;
+        cout << "What would you like to do? (add/view/wipe/remove/quit)" << endl;
         cout << "> ";
         getline(cin, word);
         if (word == "add") {
@@ -91,12 +98,23 @@ int main(int argc, char * argv[]) {
             }
         } else if (word == "view") {
             for (auto x: agenda) {
-                cout << x.first << " " << x.second << endl;
+                cout << '\t' << x.first << " " << x.second << endl;
             }
         } else if (word == "quit" || word[0] == 'q') {
             break;
         } else if (word == "wipe") {
             agenda.clear();
+        } else if (word == "remove") {
+            cout << "What event would you like to remove?" << endl << "> ";
+            for (auto x: agenda) {
+                cout << x.first << endl;
+            }
+            getline(cin, word);
+            try {
+                agenda.erase(word);
+            } catch (...) {
+                cout << "Event ''" << word << "'' not found" << endl;
+            }
         } else {
             cout << "Unrecognized command: " << word << endl;
         }
