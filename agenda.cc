@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
                         deadlines = 1;
                         cout << "Deadlines in the next " << GAP << " days:" << endl;
                     }
-                    cout << x.first << " " << x.second << endl;
+                    cout << '\t' << x.first << " " << x.second << endl;
                 }
             }
         }
