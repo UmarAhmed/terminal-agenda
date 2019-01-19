@@ -8,12 +8,14 @@
 
 using namespace std;
 
-const int GAP = 5;
+const int GAP = 6;
 const string SILENT = "-s";
+
 
 // TODO:
 // move some things to functions to clean up
 // dynamic gap/priority
+
 
 // Load in map from file (deserialize)
 map<string, Date> load() {
@@ -105,13 +107,15 @@ int main(int argc, char * argv[]) {
         } else if (word == "wipe") {
             agenda.clear();
         } else if (word == "remove") {
-            cout << "What event would you like to remove?" << endl << "> ";
+            cout << "What event would you like to remove?" << endl;
             for (auto x: agenda) {
-                cout << x.first << endl;
+                cout << '\t' << x.first << endl;
             }
+            cout << "> ";
             getline(cin, word);
             try {
                 agenda.erase(word);
+                cout << "Removed event successfully" << endl;
             } catch (...) {
                 cout << "Event ''" << word << "'' not found" << endl;
             }
@@ -122,5 +126,4 @@ int main(int argc, char * argv[]) {
     ofstream file {"agenda_data"};
     boost::archive::text_oarchive oarch(file);
     oarch << const_cast<map<string, Date> const &>(agenda);
-
 }
