@@ -26,11 +26,33 @@ map<string, Date> load() {
     return agenda;
 }
 
+// Returns length of the mth month where January is month 1
+int monthLength(int m) {
+    if (m == 11 || m == 9 || m == 6 || m == 4) {
+        return 30;
+    } else if (m == 2) {
+        return 28;
+    } else {
+        return 31;
+    }
+}
+
 
 // Check if a date is valid
-bool valid(int month, int day) {
+bool valid(const int month, const int day) {
     return ((0 < month) && (month <= 12) &&
             (0 < day) && (day <= 31));
+}
+
+
+// Count number of days since January 1
+int countDays(int month, int day) {
+    month--;
+    while (month > 0) {
+        day += monthLength(month);
+        month--;
+    }
+    return day;
 }
 
 
@@ -46,29 +68,24 @@ int main(int argc, char * argv[]) {
     // Check for "-s", which indicates silent mode
     // In silent mode we only check for impending deadline and print
     if ((argc > 1) && (argv[1] == SILENT)) {
-        // Obtain the current month (0 - 11) and day (1 - 31)
+        // Obtain days since January 1st
         time_t current = time(nullptr);
         tm * time_ptr = localtime(&current);
-        int month = time_ptr->tm_mon + 1;
-        int day = time_ptr->tm_mday;
+        int today = countDays(time_ptr->tm_mon + 1, time_ptr->tm_mday);
         // Iterate through events and see if date is in range
-        // If it's in range then print to std::cout
+        // If it's in range then print to std::cout, erase old deadlines
         bool deadlines = 0;
         for (auto x: agenda) {
-            /* auto-remove old events - should there be a delay between deletion? */
-            if (x.second.month < month) {
+            int distance = today - countDays(x.second.month, x.second.day);
+
+            if (distance > 0) {
                 agenda.erase(x.first);
-            }
-            if (x.second.month == month) {
-                if (x.second.day < day) {
-                    agenda.erase(x.first);
-                } else if ((x.second.day - day) < GAP) {
-                    if (deadlines == 0) {
-                        deadlines = 1;
-                        cout << "Deadlines in the next " << GAP << " days:" << endl;
-                    }
-                    cout << '\t' << x.first << " " << x.second << endl;
+            } else if (distance > -GAP) {
+                if (deadlines == 0) {
+                    deadlines = 1;
+                    cout << "Deadlines in the next " << GAP << " days:" << endl;
                 }
+                cout << '\t' << x.first << " " << x.second << endl;
             }
         }
         return 0;
@@ -113,11 +130,11 @@ int main(int argc, char * argv[]) {
             }
             cout << "> ";
             getline(cin, word);
-            try {
+            if (agenda.count(word) == 0) {
+                cout << "Event not found" << endl;
+            } else {
                 agenda.erase(word);
                 cout << "Removed event successfully" << endl;
-            } catch (...) {
-                cout << "Event ''" << word << "'' not found" << endl;
             }
         } else {
             cout << "Unrecognized command: " << word << endl;
