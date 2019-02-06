@@ -26,6 +26,12 @@ map<string, Date> load() {
     return agenda;
 }
 
+void save(map<std::string, Date>& agenda) {
+    ofstream file {"agenda_data"};
+    boost::archive::text_oarchive oarch(file);
+    oarch << const_cast<map<std::string, Date> const &>(agenda);
+}
+
 // Returns length of the mth month where January is month 1
 int monthLength(int m) {
     if (m == 11 || m == 9 || m == 6 || m == 4) {
@@ -75,11 +81,12 @@ int main(int argc, char * argv[]) {
         // Iterate through events and see if date is in range
         // If it's in range then print to std::cout, erase old deadlines
         bool deadlines = 0;
+        bool deleted = 0;
         for (auto x: agenda) {
             int distance = today - countDays(x.second.month, x.second.day);
-
             if (distance > 0) {
                 agenda.erase(x.first);
+                deleted = 1;
             } else if (distance > -GAP) {
                 if (deadlines == 0) {
                     deadlines = 1;
@@ -87,6 +94,9 @@ int main(int argc, char * argv[]) {
                 }
                 cout << '\t' << x.first << " " << x.second << endl;
             }
+        }
+        if (deleted) {
+            save(agenda);
         }
         return 0;
     }
@@ -140,7 +150,8 @@ int main(int argc, char * argv[]) {
             cout << "Unrecognized command: " << word << endl;
         }
     }
-    ofstream file {"agenda_data"};
-    boost::archive::text_oarchive oarch(file);
-    oarch << const_cast<map<string, Date> const &>(agenda);
+    save(agenda);
+    //ofstream file {"agenda_data"};
+    //boost::archive::text_oarchive oarch(file);
+    //oarch << const_cast<map<string, Date> const &>(agenda);
 }
